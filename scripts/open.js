@@ -1,2 +1,2 @@
-const open = require("open");
-open("http://localhost:8080");
+const open = require('open');
+open('http://localhost:8080');

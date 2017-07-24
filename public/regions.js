@@ -12,5 +12,5 @@ module.exports = {
     index: 1,
     name: 'EUROPE',
     enabled: true
-  },
+  }
 }

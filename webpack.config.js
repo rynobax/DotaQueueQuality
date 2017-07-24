@@ -6,11 +6,11 @@ module.exports = {
   entry: './app.js',
   output: {
     path: path.join(__dirname, 'build'),
-    filename: "bundle.js"
+    filename: 'bundle.js'
   },
   module: {
     loaders: [
-      { test: /\.css$/, loader: "style-loader!css-loader" },
+      { test: /\.css$/, loader: 'style-loader!css-loader' },
       {
         test: /\.(html)$/,
         use: {
@@ -23,11 +23,11 @@ module.exports = {
       {
         test: /\.scss$/,
         use: [{
-            loader: "style-loader" // creates style nodes from JS strings
+          loader: 'style-loader' // creates style nodes from JS strings
         }, {
-            loader: "css-loader" // translates CSS into CommonJS
+          loader: 'css-loader' // translates CSS into CommonJS
         }, {
-            loader: "sass-loader" // compiles Sass to CSS
+          loader: 'sass-loader' // compiles Sass to CSS
         }]
       },
       {
