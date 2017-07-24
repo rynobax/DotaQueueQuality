@@ -1,18 +1,21 @@
 const Chartist = require('chartist');
 const chartistCss = require('../node_modules/chartist/dist/chartist.css');
-const customCss = require('./custom.scss');
-const sampleData = require('./sampleData');
 const { formatDataLineGraph, formatDataScatterPlot } = require('./formatData');
+const { getMatches } = require('./query');
+const { getGraphBounds } = require('./util');
+const { backgroundColor } = require('./colors');
 
 function styleApp() { 
   const body = document.body;
-  body.style.background = 'grey';
+  body.style.background = backgroundColor;
   body.style.height = '100vh';
   body.style.margin = '0';
   body.style.overflow = 'hidden';
 }
 
-function addChart(data) {
+function addChart(data, options) {
+  const {min, max, steps} = options.bounds;
+
   const body = document.body;
   const chartDiv = document.createElement("div");
   chartDiv.style.height = '100vh';
@@ -36,17 +39,18 @@ function addChart(data) {
       },
       axisY: {
         type: Chartist.FixedScaleAxis,
-        low: 5000,
-        high: 8000,
-        divisor: 6
+        low: min,
+        high: max,
+        divisor: steps
       }
   });
 
   scatterPlot.on('draw', function(context) {
     if(context.type === 'point') {
       const styles = [
-        'stroke: blue',
-        `stroke-opacity: ${context.meta}`
+        `stroke: ${context.meta}`,
+        'stroke-width: 5px',
+        'stroke-linecap: round'
       ];
       context.element.attr({
         style: styles.join('; ')
@@ -63,8 +67,9 @@ function addChart(data) {
   lineChartDiv.id = 'line-chart';
   body.appendChild(lineChartDiv);
 
+  const lineData = formatDataLineGraph(data);
   const lineChart = new Chartist.Line('#line-chart', 
-  formatDataLineGraph(data),
+  lineData,
   {
     chartPadding: {
       right: 40
@@ -80,25 +85,36 @@ function addChart(data) {
     },
     axisY: {
       type: Chartist.FixedScaleAxis,
-      low: 5000,
-      high: 8000,
-      divisor: 6,
+      low: min,
+      high: max,
+      divisor: steps,
       showLabel: false,
       showGrid: false
     }
   });
   lineChart.on('draw', function(context) {
     if(context.type === 'line') {
+      console.log(context);
       const styles = [
-        'stroke: cyan',
-        `stroke-opacity: ${context.meta}`
+        `stroke: ${context.series[0].meta}`,
+        'stroke-width: 4px'
       ];
       context.element.attr({
         style: styles.join('; ')
       });
     }
   });
+  
 }
 
 styleApp();
-addChart(sampleData);
+getMatches(function(err, data) {
+  if(err) {
+    console.error(err);
+  } else {
+    const options = {
+      bounds: getGraphBounds(data)
+    };
+    addChart(data, options);
+  }
+});
