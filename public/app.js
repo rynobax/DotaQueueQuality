@@ -2,7 +2,7 @@ const { getMatches } = require('./query');
 const { getGraphBounds } = require('./util');
 const { backgroundColor } = require('./colors');
 const { getTimeFromTimestamp } = require('./util');
-const sortedUniqBy = require('lodash.sortedUniqBy');
+const sortedUniqBy = require('lodash.sorteduniqby');
 
 /* Charts */
 const { background } = require('./charts/background');
