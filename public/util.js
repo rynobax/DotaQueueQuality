@@ -39,30 +39,52 @@ function getGraphBounds(data) {
 }
 
 /*eslint-disable*/
-function shadeBlend(p,c0,c1) {
-    var n=p<0?p*-1:p,u=Math.round,w=parseInt;
-    if(c0.length>7){
-        var f=c0.split(","),t=(c1?c1:p<0?"rgb(0,0,0)":"rgb(255,255,255)").split(","),R=w(f[0].slice(4)),G=w(f[1]),B=w(f[2]);
-        return "rgb("+(u((w(t[0].slice(4))-R)*n)+R)+","+(u((w(t[1])-G)*n)+G)+","+(u((w(t[2])-B)*n)+B)+")"
-    }else{
-        var f=w(c0.slice(1),16),t=w((c1?c1:p<0?"#000000":"#FFFFFF").slice(1),16),R1=f>>16,G1=f>>8&0x00FF,B1=f&0x0000FF;
-        return "#"+(0x1000000+(u(((t>>16)-R1)*n)+R1)*0x10000+(u(((t>>8&0x00FF)-G1)*n)+G1)*0x100+(u(((t&0x0000FF)-B1)*n)+B1)).toString(16).slice(1)
-    }
-}
+function mix (color_1, color_2, weight) {
+  function d2h(d) { return d.toString(16); }  // convert a decimal value to hex
+  function h2d(h) { return parseInt(h, 16); } // convert a hex value to decimal 
+
+  weight = (typeof(weight) !== 'undefined') ? weight : 50; // set the weight to 50%, if that argument is omitted
+
+  var color = "#";
+
+  for(var i = 0; i <= 5; i += 2) { // loop through each of the 3 hex pairs—red, green, and blue
+    var v1 = h2d(color_1.substr(i, 2)), // extract the current pairs
+        v2 = h2d(color_2.substr(i, 2)),
+        
+        // combine the current pairs from each source color, according to the specified weight
+        val = d2h(Math.floor(v2 + (v1 - v2) * (weight / 100.0))); 
+
+    while(val.length < 2) { val = '0' + val; } // prepend a '0' if val results in a single digit
+    
+    color += val; // concatenate val to our new color string
+  }
+    
+  return color; // PROFIT!
+};
 /*eslint-enable*/
 
 function getOpacity(date) {
   const now = new Date();
-  const nowHours = now.getUTCHours();
-  const nowMinutes = now.getUTCMinutes();
-  const thenHours = date.getUTCHours();
-  const thenMinutes = date.getUTCMinutes();
-  const hoursDiff = nowHours - thenHours;
-  const minuteDiff = nowMinutes - thenMinutes;
-  const minuteDiffScaled = (minuteDiff * (100 / 60)) / 100;
+  const nowHours = now.getHours();
+  const nowMinutes = now.getMinutes();
+  const thenHours = date.getHours();
+  const thenMinutes = date.getMinutes();
+
+  let hoursDiff = nowHours - thenHours;
+  let minutesDiff = nowMinutes - thenMinutes;
+  if (minutesDiff < 0) {
+    hoursDiff--;
+    minutesDiff += 60;
+  }
+  if (hoursDiff < 0) hoursDiff += 24;
+
+  const minuteDiffScaled = (minutesDiff * (100 / 60)) / 100;
   const diff = hoursDiff + minuteDiffScaled;
-  const opacity = (24 - diff) / 24;
-  return opacity;
+  let opacity = ((24 - diff) / 24);
+  const squeezeFactor = 0.4;
+  opacity *= (1 - squeezeFactor);
+  opacity += squeezeFactor;
+  return opacity * 100;
 }
 
 function getTimeFromTimestamp(timestamp) {
@@ -75,4 +97,4 @@ function getTimeFromTimestamp(timestamp) {
   return time;
 }
 
-export { getGraphBounds, shadeBlend, getOpacity, getTimeFromTimestamp };
+export { getGraphBounds, mix, getOpacity, getTimeFromTimestamp };

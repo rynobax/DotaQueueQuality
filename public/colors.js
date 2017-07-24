@@ -1,3 +1,3 @@
 module.exports = {
-  backgroundColor: '#808080'
+  backgroundColor: '#E3DEDB'
 }

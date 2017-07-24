@@ -1,13 +1,14 @@
 const Chartist = require('chartist');
 
-function background(data, options) {
+function background(data, options, graphDiv) {
   const {min, max, steps} = options.bounds;
 
-  const body = document.body;
   const div = document.createElement('div');
-  div.style.height = '100vh';
+  for (const key in options.style) {
+    div.style[key] = options.style[key];
+  }
   div.id = 'chart-background';
-  body.appendChild(div);
+  graphDiv.appendChild(div);
 
   Chartist.Line('#chart-background',
     // Data

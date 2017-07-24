@@ -33,6 +33,7 @@
     "webpack-dev-server": "^2.5.1"
   },
   "dependencies": {
-    "chartist": "^0.11.0"
+    "chartist": "^0.11.0",
+    "lodash.sorteduniqby": "^4.7.0"
   }
 }

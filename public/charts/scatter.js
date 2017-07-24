@@ -1,11 +1,10 @@
 const Chartist = require('chartist');
 const regions = require('../regions');
-const { getOpacity, shadeBlend, getTimeFromTimestamp } = require('../util');
+const { getOpacity, mix } = require('../util');
 const { backgroundColor } = require('../colors');
 
 function formatDataScatterPlot(data) {
-  const seriesData = data.reduce((regionData, stats) => {
-    const time = getTimeFromTimestamp(stats.date);
+  const seriesDataObj = data.reduce((regionData, stats) => {
     const then = new Date(Number(stats.date));
 
     // Series
@@ -13,38 +12,41 @@ function formatDataScatterPlot(data) {
       const regionInfo = regions[region];
       if (!regionInfo || regionInfo.enabled === false) continue;
       const games = stats.games[region];
-      const i = regionInfo.index;
-      if (regionData[i] === undefined) regionData[i] = [];
+      if (regionData[region] === undefined) regionData[region] = [];
 
-      regionData[i] = regionData[i].concat(games.map((mmr) => {
+      regionData[region] = regionData[region].concat(games.map((mmr) => {
         return {
-          x: time,
+          x: stats.time,
           y: mmr,
-          meta: shadeBlend(getOpacity(then).toFixed(2), backgroundColor, regionInfo.dotColor)
+          meta: mix(regionInfo.dotColor.slice(1), backgroundColor.slice(1), getOpacity(then).toFixed(0))
         }
       }));
-      return regionData;
     }
-  }, []);
-  return {series: seriesData};
+    return regionData;
+  }, {});
+  const seriesData = [];
+  for (const key in seriesDataObj) {
+    if (seriesDataObj.hasOwnProperty(key)) {
+      seriesData.push(seriesDataObj[key]);
+    }
+  }
+  return {series: seriesData.filter(e => e !== undefined)};
 }
 
-function scatter(data, options) {
+function scatter(data, options, graphDiv) {
   const {min, max, steps} = options.bounds;
 
-  const body = document.body;
   const div = document.createElement('div');
-  div.style.top = 0;
-  div.style.left = 0;
-  div.style.position = 'fixed';
-  div.style.height = '100vh';
-  div.style.width = '100vw';
+  for (const key in options.style) {
+    div.style[key] = options.style[key];
+  }
   div.id = 'scatter-plot';
-  body.appendChild(div);
+  graphDiv.appendChild(div);
 
+  const scatterData = formatDataScatterPlot(data);
   const scatterPlot = new Chartist.Line('#scatter-plot',
     // Data
-    formatDataScatterPlot(data),
+    scatterData,
     // Options
     {
       showLine: false,
@@ -74,20 +76,7 @@ function scatter(data, options) {
     if (context.type === 'point') {
       const styles = [
         `stroke: ${context.meta}`,
-        'stroke-width: 5px',
-        'stroke-linecap: round'
-      ];
-      context.element.attr({
-        style: styles.join('; ')
-      });
-    }
-  });
-
-  scatterPlot.on('draw', function(context) {
-    if (context.type === 'point') {
-      const styles = [
-        `stroke: ${context.meta}`,
-        'stroke-width: 5px',
+        'stroke-width: 4px',
         'stroke-linecap: round'
       ];
       context.element.attr({

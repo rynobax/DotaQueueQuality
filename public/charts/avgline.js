@@ -1,10 +1,7 @@
 const Chartist = require('chartist');
 const regions = require('../regions');
-const { getTimeFromTimestamp } = require('../util');
 function formatDataLineGraph(data) {
   const seriesData = data.reduce((regionData, stats) => {
-    const time = getTimeFromTimestamp(stats.date);
-
     // Series
     for (const region in stats.games) {
       const regionInfo = regions[region];
@@ -13,13 +10,15 @@ function formatDataLineGraph(data) {
       const i = regionInfo.index;
       if (regionData[i] === undefined) regionData[i] = [];
 
-      const sum = games.reduce((sum, mmr) => {
+      let sumCount = 0;
+      const sum = games.sort((a, b) => b - a).slice(0, 4).reduce((sum, mmr) => {
+        sumCount++;
         return sum + mmr;
-      });
-      const avg = sum / games.length;
+      }, 0);
+      const avg = sum / sumCount;
 
       regionData[i] = regionData[i].concat({
-        x: time,
+        x: stats.time,
         y: avg,
         meta: regionInfo.lineColor
       });
@@ -29,24 +28,21 @@ function formatDataLineGraph(data) {
   const sortedSeriesData = seriesData.map((series) => {
     return series.sort((a, b) => a.x - b.x);
   });
-  return {series: sortedSeriesData}
+  return {series: sortedSeriesData.filter(e => e !== undefined)}
 }
 
-function line(data, options) {
+function avgline(data, options, graphDiv) {
   const {min, max, steps} = options.bounds;
 
-  const body = document.body;
   const div = document.createElement('div');
-  div.style.top = 0;
-  div.style.left = 0;
-  div.style.position = 'fixed';
-  div.style.height = '100vh';
-  div.style.width = '100vw';
-  div.id = 'line-chart';
-  body.appendChild(div);
+  for (const key in options.style) {
+    div.style[key] = options.style[key];
+  }
+  div.id = 'avg-line-chart';
+  graphDiv.appendChild(div);
 
   const lineData = formatDataLineGraph(data);
-  const lineChart = new Chartist.Line('#line-chart',
+  const lineChart = new Chartist.Line('#avg-line-chart',
     lineData,
     {
       chartPadding: {
@@ -84,4 +80,4 @@ function line(data, options) {
   });
 }
 
-export { line };
+export { avgline };
