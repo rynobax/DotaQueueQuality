@@ -1,5 +1,6 @@
 const Chartist = require('chartist');
 const { getTimeFromTimestamp } = require('../util');
+const { dividerColor } = require('../colors');
 function formatDataDividerGraph(data, min, max) {
   const now = new Date();
   const time = getTimeFromTimestamp(now.getTime());
@@ -23,6 +24,7 @@ function divider(data, options, graphDiv) {
     div.style[key] = options.style[key];
   }
   div.id = 'divider';
+  div.style.zIndex = 100;
   graphDiv.appendChild(div);
 
   const lineData = formatDataDividerGraph(data, min, max);
@@ -54,7 +56,7 @@ function divider(data, options, graphDiv) {
   lineChart.on('draw', function(context) {
     if (context.type === 'line') {
       const styles = [
-        'stroke: black',
+        `stroke: ${dividerColor}`,
         'stroke-width: 3px',
         'stroke-dasharray: 25px 8px;'
       ];

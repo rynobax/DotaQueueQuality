@@ -1,23 +1,23 @@
 module.exports = {
   'US EAST': {
-    dotColor: '#0000FF',
-    lineColor: '#0000FF',
+    dotColor: '#4444FF',
+    lineColor: '#4444FF',
     index: 0,
     name: 'US East',
     enabled: true
   },
   'EUROPE': {
-    dotColor: '#FF0000',
-    lineColor: '#FF0000',
+    dotColor: '#FF4444',
+    lineColor: '#FF4444',
     index: 1,
-    name: 'EUROPE',
-    enabled: false
+    name: 'Europe West',
+    enabled: true
   },
   'SINGAPORE': {
-    dotColor: '#00FF00',
-    lineColor: '#00FF00',
+    dotColor: '#44FF44',
+    lineColor: '#44FF44',
     index: 2,
-    name: 'SEA',
+    name: 'Southeast Asia',
     enabled: true
   }
 }

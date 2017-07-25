@@ -13,6 +13,7 @@ const { divider } = require('./charts/divider');
 
 /* CSS */
 require('../node_modules/chartist/dist/chartist.css');
+require('./fonts/Roboto/index.scss');
 
 /********/
 /* Page */
@@ -24,6 +25,7 @@ const body = document.body;
 body.style.height = '100%';
 body.style.margin = '0';
 body.style.background = backgroundColor;
+body.style.overflow = 'hidden';
 
 /**********/
 /* Header */
@@ -35,19 +37,34 @@ body.appendChild(header);
 header.id = 'header'
 header.style.height = headerHeight + 'px';
 header.style.display = 'flex';
+header.style.justifyContent = 'space-around';
+
 for (const region in regions) {
+  /* Button */
   const { name } = regions[region];
   const regionDiv = document.createElement('div');
   regionDiv.id = name;
-  regionDiv.style.flex = '1';
-  regionDiv.style.margin = '10px';
   regionDiv.onclick = (ev) => {
     regions[region].enabled = !regions[region].enabled;
     styleHeader();
-    renderGraphs();
+    renderData();
   };
+  regionDiv.style.flex = '1';
+  regionDiv.style.margin = '10px';
+  regionDiv.style.maxWidth = '200px';
+  regionDiv.style.display = 'flex';
+  regionDiv.style.flexDirection = 'column';
+  regionDiv.style.justifyContent = 'center';
+
+  /* Text */
+  const regionTextDiv = document.createElement('div');
+  regionTextDiv.style.fontFamily = 'Roboto';
+  regionTextDiv.style.textAlign = 'center'
+  regionTextDiv.style.margin = 'auto';
+  regionDiv.appendChild(regionTextDiv);
   const regionText = document.createTextNode(name);
-  regionDiv.appendChild(regionText);
+  regionTextDiv.appendChild(regionText);
+
   header.appendChild(regionDiv);
 }
 styleHeader();
@@ -62,37 +79,62 @@ function styleHeader() {
 /**********/
 /* Graphs */
 /**********/
-
 const graphDiv = document.createElement('div');
 graphDiv.id = 'graphDiv';
 body.appendChild(graphDiv);
 
-function resetGraphDiv() {
+const bgDiv = document.createElement('div');
+bgDiv.id = 'bgDiv';
+graphDiv.appendChild(bgDiv);
+
+const dataDiv = document.createElement('div');
+dataDiv.id = 'dataDiv';
+graphDiv.appendChild(dataDiv);
+
+function clearDiv(div) {
   // Remove all children
-  while (graphDiv.firstChild) {
-    graphDiv.removeChild(graphDiv.firstChild);
+  while (div.firstChild) {
+    div.removeChild(div.firstChild);
   }
-  graphDiv.style.height = window.innerHeight - headerHeight + 'px';
 }
 
-function renderGraphs() {
-  resetGraphDiv();
-  const options = {
+function getOptions() {
+  return {
     bounds: getGraphBounds(data),
     style: {
       height: graphDiv.style.height,
       top: headerHeight,
       left: 0,
-      position: 'fixed',
+      position: 'absolute',
       width: '100vw'
     }
   };
-  // If it ran twice in the same minute the graph looks strange 
-  // So filter out duplicate time entries
-  background(data, options, graphDiv);
-  scatter(data, options, graphDiv);
-  avgline(data, options, graphDiv);
-  divider(data, options, graphDiv);
+}
+
+function renderData() {
+  clearDiv(dataDiv);
+  const options = getOptions();
+  scatter(data, options, dataDiv);
+  avgline(data, options, dataDiv);
+}
+
+function renderBackground() {
+  clearDiv(bgDiv);
+  const options = getOptions();
+  background(data, options, bgDiv);
+  divider(data, options, bgDiv);
+}
+
+function initGraphs() {
+  graphDiv.style.height = window.innerHeight - headerHeight + 'px';
+  renderBackground();
+  renderData();
+}
+
+let resizeTimeout;
+window.onresize = () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(initGraphs, 400);
 }
 
 /*************/
@@ -120,7 +162,6 @@ getMatches(function(err, res) {
         return e.time !== null;
       })
       .map((e) => {
-        console.log(e);
         for (const region in e.games) {
           e.games[region] = e.games[region].filter(e => e > 5500);
         }
@@ -130,6 +171,6 @@ getMatches(function(err, res) {
         return a.time - b.time
       });
     data = sortedUniqBy(data, 'time');
-    renderGraphs();
+    initGraphs();
   }
 });

@@ -39,6 +39,10 @@ module.exports = {
             presets: ['env']
           }
         }
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|svg)$/,
+        loader: 'file-loader?name=fonts/[name].[ext]'
       }
     ]
   },
