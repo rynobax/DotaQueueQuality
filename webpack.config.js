@@ -42,5 +42,10 @@ module.exports = {
       }
     ]
   },
-  plugins: [new HtmlWebpackPlugin()]
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Dota2 Queue Monitor',
+      favicon: './img/graph.svg'
+    })
+  ]
 };
