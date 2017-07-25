@@ -95,12 +95,16 @@ function getTimeFromTimestamp(timestamp) {
   const now = new Date();
   const nowDay = now.getDay();
   const nowHour = now.getHours();
+  const nowMinute = now.getMinutes();
   const day = date.getDay();
   const hour = date.getHours()
-  const minutes = date.getMinutes();
-  const minutesScaled = (minutes * (100 / 60)) / 100;
-  const time = hour + minutesScaled;
-  if (nowDay !== day && nowHour > hour) {
+  const minute = date.getMinutes();
+  const minuteScaled = (minute * (100 / 60)) / 100;
+  const time = hour + minuteScaled;
+  const diff = Math.abs(nowDay - day);
+  if (diff === 1 && nowHour >= hour && nowMinute > minute) {
+    return null;
+  } else if (diff > 1) {
     return null;
   }
   return time;
