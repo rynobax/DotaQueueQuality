@@ -11,7 +11,7 @@ module.exports = {
     lineColor: '#FF0000',
     index: 1,
     name: 'EUROPE',
-    enabled: true
+    enabled: false
   },
   'SINGAPORE': {
     dotColor: '#00FF00',

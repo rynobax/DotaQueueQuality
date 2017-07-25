@@ -1,8 +1,9 @@
 const { getMatches } = require('./query');
 const { getGraphBounds } = require('./util');
 const { backgroundColor } = require('./colors');
-const { getTimeFromTimestamp } = require('./util');
+const { getTimeFromTimestamp, mix } = require('./util');
 const sortedUniqBy = require('lodash.sorteduniqby');
+const regions = require('./regions');
 
 /* Charts */
 const { background } = require('./charts/background');
@@ -13,6 +14,10 @@ const { divider } = require('./charts/divider');
 /* CSS */
 require('../node_modules/chartist/dist/chartist.css');
 
+/********/
+/* Page */
+/********/
+
 let data = {};
 
 const body = document.body;
@@ -20,11 +25,43 @@ body.style.height = '100%';
 body.style.margin = '0';
 body.style.background = backgroundColor;
 
+/**********/
+/* Header */
+/**********/
+
 const header = document.createElement('div');
 const headerHeight = 100;
-header.style.height = headerHeight + 'px';
-header.id = 'header'
 body.appendChild(header);
+header.id = 'header'
+header.style.height = headerHeight + 'px';
+header.style.display = 'flex';
+for (const region in regions) {
+  const { name } = regions[region];
+  const regionDiv = document.createElement('div');
+  regionDiv.id = name;
+  regionDiv.style.flex = '1';
+  regionDiv.style.margin = '10px';
+  regionDiv.onclick = (ev) => {
+    regions[region].enabled = !regions[region].enabled;
+    styleHeader();
+    renderGraphs();
+  };
+  const regionText = document.createTextNode(name);
+  regionDiv.appendChild(regionText);
+  header.appendChild(regionDiv);
+}
+styleHeader();
+function styleHeader() {
+  for (const region in regions) {
+    const { lineColor, enabled, name } = regions[region];
+    const regionDiv = document.getElementById(name);
+    regionDiv.style.background = enabled ? lineColor : mix(backgroundColor, lineColor, 80);
+  }
+}
+
+/**********/
+/* Graphs */
+/**********/
 
 const graphDiv = document.createElement('div');
 graphDiv.id = 'graphDiv';
@@ -58,8 +95,11 @@ function renderGraphs() {
   divider(data, options, graphDiv);
 }
 
+/*************/
+/* Load Data */
+/*************/
+
 getMatches(function(err, res) {
-  console.log('res: ', res);
   if (err) {
     // TODO: Display error
     const headerNode = document.createElement('H1');
@@ -83,7 +123,6 @@ getMatches(function(err, res) {
         return a.time - b.time
       });
     data = sortedUniqBy(data, 'time');
-    console.log('data: ', data);
     renderGraphs();
   }
 });

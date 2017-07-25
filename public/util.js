@@ -40,6 +40,8 @@ function getGraphBounds(data) {
 
 /*eslint-disable*/
 function mix (color_1, color_2, weight) {
+  if(color_1.substr(0, 1) === '#') color_1 = color_1.substr(1);
+  if(color_2.substr(0, 1) === '#') color_2 = color_2.substr(1);
   function d2h(d) { return d.toString(16); }  // convert a decimal value to hex
   function h2d(h) { return parseInt(h, 16); } // convert a hex value to decimal 
 
@@ -98,7 +100,7 @@ function getTimeFromTimestamp(timestamp) {
   const minutes = date.getMinutes();
   const minutesScaled = (minutes * (100 / 60)) / 100;
   const time = hour + minutesScaled;
-  if (nowDay !== day && nowHour > hour){
+  if (nowDay !== day && nowHour > hour) {
     return null;
   }
   return time;
