@@ -119,6 +119,13 @@ getMatches(function(err, res) {
         // Filter out results that are not in past 24 hours
         return e.time !== null;
       })
+      .map((e) => {
+        console.log(e);
+        for (const region in e.games) {
+          e.games[region] = e.games[region].filter(e => e > 5500);
+        }
+        return e;
+      })
       .sort((a, b) => {
         return a.time - b.time
       });
