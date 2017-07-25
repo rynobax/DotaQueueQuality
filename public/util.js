@@ -90,10 +90,17 @@ function getOpacity(date) {
 function getTimeFromTimestamp(timestamp) {
   if (typeof timestamp !== 'number') timestamp = Number(timestamp);
   const date = new Date(timestamp);
+  const now = new Date();
+  const nowDay = now.getDay();
+  const nowHour = now.getHours();
+  const day = date.getDay();
   const hour = date.getHours()
   const minutes = date.getMinutes();
   const minutesScaled = (minutes * (100 / 60)) / 100;
   const time = hour + minutesScaled;
+  if (nowDay !== day && nowHour > hour){
+    return null;
+  }
   return time;
 }
 

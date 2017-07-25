@@ -18,6 +18,7 @@ let data = {};
 const body = document.body;
 body.style.height = '100%';
 body.style.margin = '0';
+body.style.background = backgroundColor;
 
 const header = document.createElement('div');
 const headerHeight = 100;
@@ -26,7 +27,6 @@ header.id = 'header'
 body.appendChild(header);
 
 const graphDiv = document.createElement('div');
-graphDiv.style.background = backgroundColor;
 graphDiv.id = 'graphDiv';
 body.appendChild(graphDiv);
 
@@ -59,9 +59,15 @@ function renderGraphs() {
 }
 
 getMatches(function(err, res) {
+  console.log('res: ', res);
   if (err) {
     // TODO: Display error
-    // console.error(err);
+    const headerNode = document.createElement('H1');
+    const errorMessage = document.createTextNode(err);
+    headerNode.style.color = 'darkred';
+    headerNode.style.textAlign = 'center';
+    headerNode.appendChild(errorMessage);
+    body.appendChild(headerNode);
   } else {
     // Add time (hour+(minute/60)) and sort
     data = res
@@ -69,10 +75,15 @@ getMatches(function(err, res) {
         e.time = getTimeFromTimestamp(e.date);
         return e;
       })
+      .filter((e) => {
+        // Filter out results that are not in past 24 hours
+        return e.time !== null;
+      })
       .sort((a, b) => {
         return a.time - b.time
       });
     data = sortedUniqBy(data, 'time');
+    console.log('data: ', data);
     renderGraphs();
   }
 });

@@ -8,7 +8,7 @@ function getMatches(cb) {
         const json = JSON.parse(this.responseText);
         const items = json.Items;
         const data = items.map((match) => {
-          const date = match.date.N
+          const date = match.gamesDate.N
           const games = JSON.parse(match.games.S);
           return {
             date,
