@@ -15,6 +15,9 @@ const { divider } = require('./charts/divider');
 require('../node_modules/chartist/dist/chartist.css');
 require('./fonts/Roboto/index.scss');
 
+/* Google Analytics */
+require('./google-analytics');
+
 /********/
 /* Page */
 /********/
