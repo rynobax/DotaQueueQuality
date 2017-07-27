@@ -1,6 +1,6 @@
 const { getMatches } = require('./query');
-const { getGraphBounds } = require('./util');
-const { backgroundColor } = require('./colors');
+const { getVerticalBounds, getHorizontalBounds } = require('./util');
+const { backgroundColor, textColor } = require('./colors');
 const { getTimeFromTimestamp, mix } = require('./util');
 const sortedUniqBy = require('lodash.sorteduniqby');
 const regions = require('./regions');
@@ -57,9 +57,32 @@ function applyTextStyle(text) {
   text.style.fontFamily = 'Roboto';
   text.style.textAlign = 'center'
   text.style.margin = 'auto';
+  text.style.color = textColor;
 }
 
 // Time selector
+const timeframeDiv = document.createElement('div');
+applyHeaderStyle(timeframeDiv);
+const timeframeSelector = document.createElement('select');
+timeframeSelector.style.color = textColor;
+timeframeSelector.style.border = '1px solid #111';
+timeframeSelector.style.background = '#eeebe9';
+timeframeSelector.style.padding = '5px 35px 5px 5px';
+timeframeSelector.style.fontSize = '16px';
+timeframeSelector.style.height = '34px';
+const dayOption = document.createElement('option');
+const weekOption = document.createElement('option');
+dayOption.text = 'Day';
+dayOption.value = 'day';
+weekOption.text = 'Week';
+weekOption.value = 'week';
+timeframeSelector.add(dayOption);
+timeframeSelector.add(weekOption);
+timeframeSelector.onchange = (e) => {
+  drawGraphs();
+};
+timeframeDiv.appendChild(timeframeSelector);
+header.appendChild(timeframeDiv);
 
 // Region buttons
 for (const region in regions) {
@@ -142,14 +165,16 @@ function clearDiv(div) {
 
 function getOptions() {
   return {
-    bounds: getGraphBounds(data),
+    verticalBounds: getVerticalBounds(data),
+    horizontalBounds: getHorizontalBounds(timeframeSelector.value),
     style: {
       height: graphDiv.style.height,
       top: headerHeight,
       left: 0,
       position: 'absolute',
       width: '100vw'
-    }
+    },
+    timeframe: timeframeSelector.value
   };
 }
 
@@ -167,7 +192,7 @@ function renderBackground() {
   divider(data, options, bgDiv);
 }
 
-function initGraphs() {
+function drawGraphs() {
   graphDiv.style.height = window.innerHeight - headerHeight + 'px';
   renderBackground();
   renderData();
@@ -176,7 +201,7 @@ function initGraphs() {
 let resizeTimeout;
 window.onresize = () => {
   clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(initGraphs, 400);
+  resizeTimeout = setTimeout(drawGraphs, 400);
 }
 
 /*************/
@@ -199,10 +224,6 @@ getMatches(function(err, res) {
         e.time = getTimeFromTimestamp(e.date);
         return e;
       })
-      .filter((e) => {
-        // Filter out results that are not in past 24 hours
-        return e.time !== null;
-      })
       .map((e) => {
         for (const region in e.games) {
           e.games[region] = e.games[region].filter(e => e > 5500);
@@ -213,6 +234,6 @@ getMatches(function(err, res) {
         return a.time - b.time
       });
     data = sortedUniqBy(data, 'time');
-    initGraphs();
+    drawGraphs();
   }
 });

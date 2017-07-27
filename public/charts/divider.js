@@ -1,23 +1,24 @@
 const Chartist = require('chartist');
 const { getTimeFromTimestamp } = require('../util');
 const { dividerColor } = require('../colors');
-function formatDataDividerGraph(data, min, max) {
+function formatDataDividerGraph(data, min, max, timeframe) {
   const now = new Date();
   const time = getTimeFromTimestamp(now.getTime());
   return {series: [[
     {
-      x: time,
+      x: time[timeframe],
       y: min
     },
     {
-      x: time + 0.00001,
+      x: time[timeframe] + 0.00001,
       y: max
     }
   ]]}
 }
 
 function divider(data, options, graphDiv) {
-  const {min, max, steps} = options.bounds;
+  const {vmin, vmax, vsteps} = options.verticalBounds;
+  const {hmin, hmax, hsteps} = options.horizontalBounds;
 
   const div = document.createElement('div');
   for (const key in options.style) {
@@ -27,7 +28,7 @@ function divider(data, options, graphDiv) {
   div.style.zIndex = 1;
   graphDiv.appendChild(div);
 
-  const lineData = formatDataDividerGraph(data, min, max);
+  const lineData = formatDataDividerGraph(data, vmin, vmax, options.timeframe);
   const lineChart = new Chartist.Line('#divider',
     lineData,
     {
@@ -37,17 +38,17 @@ function divider(data, options, graphDiv) {
       showPoint: false,
       axisX: {
         type: Chartist.FixedScaleAxis,
-        low: 0,
-        high: 24,
-        divisor: 24,
+        low: hmin,
+        high: hmax,
+        divisor: hsteps,
         showLabel: false,
         showGrid: false
       },
       axisY: {
         type: Chartist.FixedScaleAxis,
-        low: min,
-        high: max,
-        divisor: steps,
+        low: vmin,
+        high: vmax,
+        divisor: vsteps,
         showLabel: false,
         showGrid: false
       }

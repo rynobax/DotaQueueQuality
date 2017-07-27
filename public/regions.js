@@ -14,8 +14,8 @@ module.exports = {
     enabled: true
   },
   'SINGAPORE': {
-    dotColor: '#44FF44',
-    lineColor: '#44FF44',
+    dotColor: '#2fb22f',
+    lineColor: '#2fb22f',
     index: 2,
     name: 'Southeast Asia',
     enabled: true

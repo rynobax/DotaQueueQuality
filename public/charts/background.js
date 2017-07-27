@@ -1,7 +1,8 @@
 const Chartist = require('chartist');
 
 function background(data, options, graphDiv) {
-  const {min, max, steps} = options.bounds;
+  const {vmin, vmax, vsteps} = options.verticalBounds;
+  const {hmin, hmax, hsteps} = options.horizontalBounds;
 
   const div = document.createElement('div');
   for (const key in options.style) {
@@ -10,7 +11,7 @@ function background(data, options, graphDiv) {
   div.id = 'chart-background';
   graphDiv.appendChild(div);
 
-  Chartist.Line('#chart-background',
+  const bg = Chartist.Line('#chart-background',
     // Data
     {},
     // Options
@@ -21,18 +22,30 @@ function background(data, options, graphDiv) {
       },
       axisX: {
         type: Chartist.FixedScaleAxis,
-        low: 0,
-        high: 24,
-        divisor: 24
+        low: hmin,
+        high: hmax,
+        divisor: hsteps
       },
       axisY: {
         type: Chartist.FixedScaleAxis,
-        low: min,
-        high: max,
-        divisor: steps
+        low: vmin,
+        high: vmax,
+        divisor: vsteps
       }
     }
   );
+
+  // Fix labels
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  if (options.timeframe === 'week') {
+    bg.on('draw', function(context) {
+      if (context.type === 'label') {
+        if (context.text >= 0 && context.text < 7) {
+          context.element._node.childNodes[0].textContent = days[context.text];
+        }
+      }
+    });
+  }
 }
 
 export { background };

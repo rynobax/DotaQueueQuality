@@ -3,27 +3,32 @@ const regions = require('../regions');
 const { getOpacity, mix } = require('../util');
 const { backgroundColor } = require('../colors');
 
-function formatDataScatterPlot(data) {
-  const seriesDataObj = data.reduce((regionData, stats) => {
-    const then = new Date(Number(stats.date));
+function formatDataScatterPlot(data, timeframe) {
+  const seriesDataObj = data
+    .filter((stats) => {
+      if (stats.time[timeframe] === null) return false;
+      return true;
+    })
+    .reduce((regionData, stats) => {
+      const then = new Date(Number(stats.date));
 
-    // Series
-    for (const region in stats.games) {
-      const regionInfo = regions[region];
-      if (!regionInfo || regionInfo.enabled === false) continue;
-      const games = stats.games[region];
-      if (regionData[region] === undefined) regionData[region] = [];
+      // Series
+      for (const region in stats.games) {
+        const regionInfo = regions[region];
+        if (!regionInfo || regionInfo.enabled === false) continue;
+        const games = stats.games[region];
+        if (regionData[region] === undefined) regionData[region] = [];
 
-      regionData[region] = regionData[region].concat(games.map((mmr) => {
-        return {
-          x: stats.time,
-          y: mmr,
-          meta: mix(regionInfo.dotColor.slice(1), backgroundColor.slice(1), getOpacity(then).toFixed(0))
-        }
-      }));
-    }
-    return regionData;
-  }, {});
+        regionData[region] = regionData[region].concat(games.map((mmr) => {
+          return {
+            x: stats.time[timeframe],
+            y: mmr,
+            meta: mix(regionInfo.dotColor.slice(1), backgroundColor.slice(1), getOpacity(then, timeframe).toFixed(0))
+          }
+        }));
+      }
+      return regionData;
+    }, {});
   const seriesData = [];
   for (const key in seriesDataObj) {
     if (seriesDataObj.hasOwnProperty(key)) {
@@ -34,7 +39,8 @@ function formatDataScatterPlot(data) {
 }
 
 function scatter(data, options, graphDiv) {
-  const {min, max, steps} = options.bounds;
+  const {vmin, vmax, vsteps} = options.verticalBounds;
+  const {hmin, hmax, hsteps} = options.horizontalBounds;
 
   const div = document.createElement('div');
   for (const key in options.style) {
@@ -43,7 +49,7 @@ function scatter(data, options, graphDiv) {
   div.id = 'scatter-plot';
   graphDiv.appendChild(div);
 
-  const scatterData = formatDataScatterPlot(data);
+  const scatterData = formatDataScatterPlot(data, options.timeframe);
   const scatterPlot = new Chartist.Line('#scatter-plot',
     // Data
     scatterData,
@@ -55,17 +61,17 @@ function scatter(data, options, graphDiv) {
       },
       axisX: {
         type: Chartist.FixedScaleAxis,
-        low: 0,
-        high: 24,
-        divisor: 24,
+        low: hmin,
+        high: hmax,
+        divisor: hsteps,
         showLabel: false,
         showGrid: false
       },
       axisY: {
         type: Chartist.FixedScaleAxis,
-        low: min,
-        high: max,
-        divisor: steps,
+        low: vmin,
+        high: vmax,
+        divisor: vsteps,
         showLabel: false,
         showGrid: false
       }

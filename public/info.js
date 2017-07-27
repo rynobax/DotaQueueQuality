@@ -16,7 +16,6 @@ const titleText = document.createTextNode('Dota Queue Monitor');
 title.appendChild(titleText);
 infoModalContent.appendChild(title);
 textArr.forEach((node) => {
-  console.log(node);
   infoModalContent.appendChild(node);
 });
 module.exports = infoModalContent;

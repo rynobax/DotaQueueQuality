@@ -1,4 +1,4 @@
-function getGraphBounds(data) {
+function getVerticalBounds(data) {
   const {min, max} = data.reduce((returnObj, {games}) => {
     for (const region in games) {
       const { regionMin, regionMax } = games[region].reduce(({regionMin, regionMax}, mmr, i) => {
@@ -32,9 +32,27 @@ function getGraphBounds(data) {
   const maxAdj = Math.ceil(max / 500) * 500;
   const minAdj = Math.floor(min / 500) * 500;
   return {
-    max: maxAdj,
-    min: minAdj,
-    steps: (maxAdj - minAdj) / 500
+    vmax: maxAdj,
+    vmin: minAdj,
+    vsteps: (maxAdj - minAdj) / 500
+  }
+}
+
+function getHorizontalBounds(timeframe) { 
+  if (timeframe === 'day') { 
+    return {
+      hmax: 24,
+      hmin: 0,
+      hsteps: 24
+    }
+  } else if (timeframe === 'week') {
+    return {
+      hmax: 7,
+      hmin: 0,
+      hsteps: 7
+    }
+  } else {
+    throw Error('Invalid timeframe ' + timeframe);
   }
 }
 
@@ -65,49 +83,43 @@ function mix (color_1, color_2, weight) {
 };
 /*eslint-enable*/
 
-function getOpacity(date) {
-  const now = new Date();
-  const nowHours = now.getHours();
-  const nowMinutes = now.getMinutes();
-  const thenHours = date.getHours();
-  const thenMinutes = date.getMinutes();
+const now = new Date();
+const msInDay = 86400000;
 
-  let hoursDiff = nowHours - thenHours;
-  let minutesDiff = nowMinutes - thenMinutes;
-  if (minutesDiff < 0) {
-    hoursDiff--;
-    minutesDiff += 60;
+function getOpacity(date, timeframe) {
+  const diffInMs = now - date;
+  let diffPercent = 0;
+  if (timeframe === 'day') {
+    diffPercent = 1 - (diffInMs / msInDay);
+  } else {
+    diffPercent = 1 - (diffInMs / (msInDay * 7));
   }
-  if (hoursDiff < 0) hoursDiff += 24;
-
-  const minuteDiffScaled = (minutesDiff * (100 / 60)) / 100;
-  const diff = hoursDiff + minuteDiffScaled;
-  let opacity = ((24 - diff) / 24);
   const squeezeFactor = 0.4;
-  opacity *= (1 - squeezeFactor);
-  opacity += squeezeFactor;
-  return opacity * 100;
+  diffPercent *= (1 - squeezeFactor);
+  diffPercent += squeezeFactor;
+  return diffPercent * 100;
 }
 
-function getTimeFromTimestamp(timestamp) {
+function getTimeFromTimestamp(timestamp, timeframe) {
   if (typeof timestamp !== 'number') timestamp = Number(timestamp);
   const date = new Date(timestamp);
-  const now = new Date();
-  const nowDay = now.getDay();
-  const nowHour = now.getHours();
-  const nowMinute = now.getMinutes();
-  const day = date.getDay();
-  const hour = date.getHours()
-  const minute = date.getMinutes();
-  const minuteScaled = (minute * (100 / 60)) / 100;
-  const time = hour + minuteScaled;
-  const diff = Math.abs(nowDay - day);
-  if (diff === 1 && nowHour >= hour && nowMinute > minute) {
-    return null;
-  } else if (diff > 1) {
-    return null;
+
+  const lastValidWeekDate = now.getTime() - (msInDay * 7);
+  const lastValidDayDate = now.getTime() - msInDay;
+
+  const weekDiffInMs = date - lastValidWeekDate;
+  const dayDiffInMs = date - lastValidDayDate;
+
+  const weekValid = weekDiffInMs > 0;
+  const dayValid = dayDiffInMs > 0;
+
+  const weekMinutesScaled = (date.getMinutes() / 60) * 0.1;
+  const weekHoursScaled = (date.getHours() / 24);
+  const dayMinutesScaled = (date.getMinutes() / 60);
+  return {
+    week: weekValid ? date.getDay() + weekHoursScaled + weekMinutesScaled : null,
+    day: dayValid ? date.getHours() + dayMinutesScaled : null
   }
-  return time;
 }
 
-export { getGraphBounds, mix, getOpacity, getTimeFromTimestamp };
+export { getVerticalBounds, getHorizontalBounds, mix, getOpacity, getTimeFromTimestamp };
