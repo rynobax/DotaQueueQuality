@@ -14,6 +14,7 @@ const { divider } = require('./charts/divider');
 /* CSS */
 require('../node_modules/chartist/dist/chartist.css');
 require('./fonts/Roboto/index.scss');
+require('./modal.css');
 
 /* Google Analytics */
 require('./google-analytics');
@@ -42,6 +43,25 @@ header.style.height = headerHeight + 'px';
 header.style.display = 'flex';
 header.style.justifyContent = 'space-around';
 
+function applyHeaderStyle(div) {
+  div.style.flex = '1';
+  div.style.margin = '10px';
+  div.style.maxWidth = '200px';
+  div.style.display = 'flex';
+  div.style.padding = '15px';
+  div.style.flexDirection = 'column';
+  div.style.justifyContent = 'center';
+}
+
+function applyTextStyle(text) {
+  text.style.fontFamily = 'Roboto';
+  text.style.textAlign = 'center'
+  text.style.margin = 'auto';
+}
+
+// Time selector
+
+// Region buttons
 for (const region in regions) {
   /* Button */
   const { name } = regions[region];
@@ -52,24 +72,43 @@ for (const region in regions) {
     styleHeader();
     renderData();
   };
-  regionDiv.style.flex = '1';
-  regionDiv.style.margin = '10px';
-  regionDiv.style.maxWidth = '200px';
-  regionDiv.style.display = 'flex';
-  regionDiv.style.flexDirection = 'column';
-  regionDiv.style.justifyContent = 'center';
+  applyHeaderStyle(regionDiv);
 
   /* Text */
   const regionTextDiv = document.createElement('div');
-  regionTextDiv.style.fontFamily = 'Roboto';
-  regionTextDiv.style.textAlign = 'center'
-  regionTextDiv.style.margin = 'auto';
+  applyTextStyle(regionDiv);
   regionDiv.appendChild(regionTextDiv);
   const regionText = document.createTextNode(name);
   regionTextDiv.appendChild(regionText);
 
   header.appendChild(regionDiv);
 }
+
+// Info Modal
+const infoModal = document.createElement('div');
+infoModal.classList.add('modal');
+infoModal.appendChild(require('./info'));
+body.appendChild(infoModal);
+window.onclick = function(event) {
+  if (event.target === infoModal) {
+    infoModal.style.display = 'none';
+  }
+}
+
+// Info Button
+const infoDiv = document.createElement('div');
+applyHeaderStyle(infoDiv);
+const infoImage = document.createElement('img');
+infoImage.src = require('./img/info.svg');
+infoImage.style.width = '100%';
+infoImage.style.height = '100%';
+infoDiv.appendChild(infoImage);
+header.appendChild(infoDiv);
+infoImage.onclick = () => {
+  infoModal.style.display = 'block';
+}
+
+// Called when buttons are pressed
 styleHeader();
 function styleHeader() {
   for (const region in regions) {

@@ -24,7 +24,7 @@ function divider(data, options, graphDiv) {
     div.style[key] = options.style[key];
   }
   div.id = 'divider';
-  div.style.zIndex = 100;
+  div.style.zIndex = 1;
   graphDiv.appendChild(div);
 
   const lineData = formatDataDividerGraph(data, min, max);
