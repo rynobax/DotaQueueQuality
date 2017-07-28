@@ -1,7 +1,7 @@
 const Chartist = require('chartist');
 const regions = require('../regions');
 function formatDataLineGraph(data, timeframe) {
-  let toTake = 6;
+  let toTake = 3;
   if (timeframe === 'week') {
     toTake *= 7;
   }
