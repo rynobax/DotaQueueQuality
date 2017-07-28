@@ -38,8 +38,8 @@ function getVerticalBounds(data) {
   }
 }
 
-function getHorizontalBounds(timeframe) { 
-  if (timeframe === 'day') { 
+function getHorizontalBounds(timeframe) {
+  if (timeframe === 'day') {
     return {
       hmax: 24,
       hmin: 0,
