@@ -21,10 +21,14 @@ function formatDataLineGraph(data, timeframe) {
         if (regionData[i] === undefined) regionData[i] = [];
 
         let sumCount = 0;
-        const sum = games.sort((a, b) => b - a).slice(0, 4).reduce((sum, mmr) => {
-          sumCount++;
-          return sum + mmr;
-        }, 0);
+        const numToRemove = Math.floor(games.length * 0.2);
+        const sum = games
+          .sort((a, b) => b - a)
+          .slice(numToRemove, games.length - numToRemove)
+          .reduce((sum, mmr) => {
+            sumCount++;
+            return sum + mmr;
+          }, 0);
         const avg = sum / sumCount;
 
         regionData[i] = regionData[i].concat({
